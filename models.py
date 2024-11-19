@@ -29,7 +29,7 @@ class Session(BaseModel):
 
 
 class Cinema(BaseModel):
-    id: int
+    cinema_id: int
     name: str
     address: Address
     halls: int
