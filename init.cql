@@ -135,3 +135,13 @@ CREATE TABLE IF NOT EXISTS tickets_by_user (
     seat      SMALLINT,
     PRIMARY KEY (user_id, date, ticket_id)
 ) WITH CLUSTERING ORDER BY (date DESC, ticket_id ASC);
+
+
+INSERT INTO ticket.users (user_id, name, password, email, phone)
+VALUES (1, 'john doe', 'secret', 'johndoe@mail.com', '+123456789');
+
+INSERT INTO movie.sessions (session_id, available_seats, time, price, hall, format)
+VALUES (1, 120, '14:30:00', 350, 1, 'IMAX');
+
+INSERT INTO movie.cinemas (cinema_id, halls, name, address) 
+VALUES (1, 3, 'test', {city: 'Москва', street: 'пр-т Вернадского', building: 73});

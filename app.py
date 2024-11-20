@@ -1,31 +1,25 @@
-import asyncio
-from typing import Union
-from cassandra.cluster import Cluster
-from cassandra.cqlengine.management import sync_table
-from cassandra.cqlengine import connection
-from models import Cinema
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 import schemas
 
 from database import Database
 
 
-# def run_migration(db: Database, filename: str):
-#     with open(filename, "r") as file:
-#         schema_commands = file.read()
+def run_migration(db: Database, filename: str):
+    with open(filename, "r") as file:
+        commands = file.read().split(";")
 
-#         for command in schema_commands.split(";"):
-#             command = command.strip()
-#             if command:
-#                 try:
-#                     db.cluster.connect().execute(command)
-#                     print(f"Add table: {command}")
-#                 except Exception as e:
-#                     print(f"Error: {command}\n{e}")
+        for cmd in commands:
+            cmd = cmd.strip()
+            if cmd:
+                try:
+                    db.cluster.connect().execute(cmd)
+                    print(f"Add table: {cmd}")
+                except Exception as e:
+                    print(f"Error: {cmd}\n{e}")
 
 
 app = FastAPI()
-db = Database(Cluster())
+db = Database()
 
 # run_migration(db, "init.cql")
 
@@ -56,59 +50,45 @@ def unconvert_address(obj):
     return "{" + ", ".join(result) + "}"
 
 
-@app.get("/ping")
-def read_root():
-    return {"status": "ok"}
+@app.get("/hosts")
+def get_hosts():
+    return db.hosts
 
 
 @app.get("/cinemas")
 def get_cinemas():
-    rows = db.movie.execute("SELECT * FROM cinemas;")
-    result = []
-    for row in rows:
-        result.append(
-            {
-                "id": row.cinema_id,
-                "name": row.name,
-                "address": convert_address(row.address),
-                "halls": row.halls,
-            }
-        )
-    return result
-
-
-@app.get("/tickets")
-def get_tickets():
-    rows = db.movie.execute("SELECT * FROM tickets;")
-    result = []
-    for row in rows:
-        result.append(
-            {
-                "id": row.cinema_id,
-                "name": row.name,
-                "address": convert_address(row.address),
-                "halls": row.halls,
-            }
-        )
-    return result
+    rows = db.movie.execute("SELECT * FROM cinemas")
+    return [dict(row) for row in rows]
 
 
 @app.get("/movies")
 def get_movies():
-    pass
+    rows = db.movie.execute("SELECT * FROM movies")
+    return [dict(row) for row in rows]
 
 
 @app.get("/sessions")
 def get_sessions():
-    pass
+    rows = db.movie.execute("SELECT * FROM sessions")
+    return [dict(row) for row in rows]
 
 
 @app.get("/users")
 def get_users():
-    pass
+    rows = db.ticket.execute("SELECT * FROM users")
+    return [dict(row) for row in rows]
 
 
-# INSERT INTO cinemas (cinema_id, halls, name, address) VALUES (1, 3, 'test', {city: 'Moscow', street: 'Stromunka'});
+@app.get("/tickets")
+def get_tickets():
+    rows = db.ticket.execute("SELECT * FROM tickets")
+    return [dict(row) for row in rows]
+
+
+@app.get("/orders")
+def get_orders():
+    rows = db.ticket.execute("SELECT * FROM orders")
+    return [dict(row) for row in rows]
 
 
 @app.post("/cinemas")
@@ -119,5 +99,5 @@ def create_cinema(cinema: schemas.Cinema):
         f"VALUES ({cinema.cinema_id}, {cinema.halls}, '{cinema.name}', {unconvert_address(cinema.address)})"
     )
     print(query)
-    res = db.movie.execute(query)
+    db.movie.execute(query)
     return cinema
