@@ -13,7 +13,7 @@ class Address(BaseModel):
 class Movie(BaseModel):
     id: int
     title: str
-    duration: str  # ПРОДУМАТЬ БЛЯ
+    duration: str
     release_date: date
     genre: str
     score: float
