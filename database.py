@@ -6,7 +6,9 @@ class Database:
     cluster: Cluster
     sessions: dict
 
-    def __init__(self):
+    def __init__(self, test=False):
+        if test:
+            return
         self.cluster = Cluster(["127.0.0.1"])
         self.sessions = {}
 
