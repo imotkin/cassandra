@@ -64,19 +64,30 @@ def get_cinemas():
     return [dict(row) for row in rows]
 
 
+@app.get("/cinemas/{cinema_id}", summary="Получение информации о кинотеатре")
+def get_cinema_by_id(cinema_id: int):
+    select_query = "SELECT * FROM cinemas WHERE cinema_id = %i"
+    rows = db.movie.execute(select_query, cinema_id)
+    return [dict(row) for row in rows]
+
+
 @app.get("/movies", summary="Получение списка всех фильмов")
 def get_movies():
     rows = db.movie.execute("SELECT * FROM movies")
     return [dict(row) for row in rows]
 
 
+@app.get("/movies/{movie_id}", summary="Получение информации о фильме")
+def get_movie_by_id(movie_id: int):
+    select_query = "SELECT * FROM movies WHERE movie_id = %i"
+    rows = db.movie.execute(select_query, movie_id)
+    return [dict(row) for row in rows]
+
+
 @app.get("/movies/{cinema_id}/", summary="Получение списка фильмов для определенного кинотеатра")
 def get_movies_by_cinema(cinema_id: int):
-    select_query = (
-        "SELECT * FROM movies_by_cinema"
-        f"WHERE cinema_id = {cinema_id}"
-    )
-    rows = db.movie.execute(select_query)
+    select_query = "SELECT * FROM movies_by_cinema WHERE cinema_id = %i"
+    rows = db.movie.execute(select_query, cinema_id)
     return [dict(row) for row in rows]
 
 
@@ -106,9 +117,30 @@ def get_sessions():
     return [dict(row) for row in rows]
 
 
+@app.get("/sessions/{session_id}", summary="Получение информации о сеансе")
+def get_session_by_id(session_id: int):
+    select_query = "SELECT * FROM sessions WHERE session_id = %i"
+    rows = db.movie.execute(select_query, session_id)
+    return [dict(row) for row in rows]
+
+
+@app.get("/sessions/{movie_id}", summary="Получение сеансов по фильму")
+def get_session_by_movie(movie_id: int):
+    select_query = "SELECT * FROM sessions_by_movie WHERE movie_id = %i"
+    rows = db.movie.execute(select_query, movie_id)
+    return [dict(row) for row in rows]
+
+
 @app.get("/users", summary="Получение списка всех пользователей")
 def get_users():
     rows = db.ticket.execute("SELECT * FROM users")
+    return [dict(row) for row in rows]
+
+
+@app.get("/users/{user_id}", summary="Получение информации о пользователе")
+def get_user_by_id(user_id: int):
+    select_query = "SELECT * FROM users WHERE user_id = %i"
+    rows = db.ticket.execute(select_query, user_id)
     return [dict(row) for row in rows]
 
 
@@ -118,9 +150,44 @@ def get_tickets():
     return [dict(row) for row in rows]
 
 
+@app.get("/tickets/{ticket_id}", summary="Получение информации о билете")
+def get_ticket_by_id(ticket_id: int):
+    select_query = "SELECT * FROM tickets WHERE ticket_id = %i"
+    rows = db.ticket.execute(select_query, ticket_id)
+    return [dict(row) for row in rows]
+
+
+@app.get("/tickets/{order_id}", summary="Получение билетов для определенного заказа")
+def get_ticket_by_order(order_id: int):
+    select_query = "SELECT * FROM tickets_by_order WHERE order_id = %i"
+    rows = db.ticket.execute(select_query, order_id)
+    return [dict(row) for row in rows]
+
+
+@app.get("/tickets/{user_id}", summary="Получение билетов для определенного пользователя")
+def get_ticket_by_order(user_id: int):
+    select_query = "SELECT * FROM tickets_by_user WHERE user_id = %i"
+    rows = db.ticket.execute(select_query, user_id)
+    return [dict(row) for row in rows]
+
+
 @app.get("/orders", summary="Получение списка всех заказов")
 def get_orders():
     rows = db.ticket.execute("SELECT * FROM orders")
+    return [dict(row) for row in rows]
+
+
+@app.get("/orders/{order_id}", summary="Получение информации о заказе")
+def get_order_by_id(order_id: int):
+    select_query = "SELECT * FROM orders WHERE order_id = %i"
+    rows = db.ticket.execute(select_query, order_id)
+    return [dict(row) for row in rows]
+
+
+@app.get("/orders/{session_id}", summary="Получение заказов для определенного сеанса")
+def get_orders_by_session(session_id: int):
+    select_query = "SELECT * FROM orders_by_session WHERE session_id = %i"
+    rows = db.movie.execute(select_query, session_id)
     return [dict(row) for row in rows]
 
 

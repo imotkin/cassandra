@@ -3,7 +3,7 @@ CREATE KEYSPACE movie WITH REPLICATION = {'class': 'SimpleStrategy', 'replicatio
 USE movie;
 
 CREATE TABLE IF NOT EXISTS movies (
-    movies       BIGINT PRIMARY KEY,
+    movie_id       BIGINT PRIMARY KEY,
     title        TEXT,
     duration     DURATION,
     release_date DATE,
