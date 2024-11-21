@@ -1,8 +1,4 @@
-from datetime import datetime, date
-
-
 class Address:
-    
     def __init__(self, city, street, postal_code, house, building):
         self.city = city
         self.street = street
@@ -12,7 +8,6 @@ class Address:
 
 
 class Movie:
-
     def __init__(self, id, title, duration, release_date, genre, score):
         self.id = id
         self.title = title
@@ -23,7 +18,6 @@ class Movie:
 
 
 class Session:
-
     def __init__(self, id, available_seats, time, price, hall, format):
         self.id = id
         self.available_seats = available_seats
@@ -34,7 +28,6 @@ class Session:
 
 
 class Cinema:
-
     def __init__(self, cinema_id, name, address, halls):
         self.cinema_id = cinema_id
         self.name = name
@@ -43,7 +36,6 @@ class Cinema:
 
 
 class User:
-
     def __init__(self, user_id, email, name, password, phone):
         self.user_id = user_id
         self.name = name
@@ -53,7 +45,6 @@ class User:
 
 
 class Ticket:
-
     def __init__(self, id, price, hall, seat, date):
         self.id = id
         self.price = price
@@ -63,7 +54,6 @@ class Ticket:
 
 
 class Order:
-
     def __init__(self, order_id, user_id, date, status, price):
         self.order_id = order_id
         self.user_id = user_id

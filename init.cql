@@ -144,4 +144,16 @@ INSERT INTO movie.sessions (session_id, available_seats, time, price, hall, form
 VALUES (1, 120, '14:30:00', 350, 1, 'IMAX');
 
 INSERT INTO movie.cinemas (cinema_id, halls, name, address) 
-VALUES (1, 3, 'test', {city: 'Москва', street: 'пр-т Вернадского', building: 73});
+VALUES (1, 3, 'Киномакс', {city: 'Москва', street: 'пр-т Вернадского', building: 73});
+
+INSERT INTO movie.movies (movie_id, title, duration, release_date, genre, score) 
+VALUES (1, 'Стражи Галактики', null, null, 'Action', 7.5);
+
+INSERT INTO movie.movies (movie_id, title, duration, release_date, genre, score) 
+VALUES (2, 'Убить Билла', null, null, 'Thriller', 8);
+
+INSERT INTO movie.movies_by_cinema (cinema_id, movie_id, title, duration, date, genre) 
+VALUES (1, 2, 'Убить Билла', null, '2008-01-01', 'Thriller');
+
+INSERT INTO movie.movies_by_cinema (cinema_id, movie_id, title, duration, date, genre) 
+VALUES (1, 1, 'Стражи Галактики', null, '2014-01-01', 'Action');
