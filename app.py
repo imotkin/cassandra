@@ -1,4 +1,7 @@
-from fastapi import FastAPI
+from datetime import datetime
+from typing import Annotated
+
+from fastapi import FastAPI, Path
 import schemas
 
 from database import Database
@@ -19,7 +22,7 @@ def run_migration(db: Database, filename: str):
 
 
 app = FastAPI()
-db = Database()
+db = Database(test=True)
 
 # run_migration(db, "init.cql")
 
@@ -64,6 +67,36 @@ def get_cinemas():
 @app.get("/movies")
 def get_movies():
     rows = db.movie.execute("SELECT * FROM movies")
+    return [dict(row) for row in rows]
+
+
+@app.get("/movies/{cinema_id}/", summary="Получение списка фильмов для определенного кинотеатра")
+def get_movies_by_cinema(cinema_id: int):
+    select_query = (
+        "SELECT * FROM movies_by_cinema"
+        f"WHERE cinema_id = {cinema_id}"
+    )
+    rows = db.movie.execute(select_query)
+    return [dict(row) for row in rows]
+
+
+@app.get("/movies/{date}/", summary="Получение списка фильмов для определенной даты")
+def get_movies_by_cinema(date: datetime):
+    select_query = (
+        "SELECT * FROM movies_by_date"
+        f"WHERE date = {date}"
+    )
+    rows = db.movie.execute(select_query)
+    return [dict(row) for row in rows]
+
+
+@app.get("/movies/{genre}/", summary="Получение списка фильмов для определенного жанра")
+def get_movies_by_cinema(genre: str):
+    select_query = (
+        "SELECT * FROM movies_by_genre"
+        f"WHERE genre = {genre}"
+    )
+    rows = db.movie.execute(select_query)
     return [dict(row) for row in rows]
 
 
