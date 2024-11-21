@@ -58,13 +58,13 @@ def get_hosts():
     return db.hosts
 
 
-@app.get("/cinemas")
+@app.get("/cinemas", summary="Получение списка всех кинотеатров")
 def get_cinemas():
     rows = db.movie.execute("SELECT * FROM cinemas")
     return [dict(row) for row in rows]
 
 
-@app.get("/movies")
+@app.get("/movies", summary="Получение списка всех фильмов")
 def get_movies():
     rows = db.movie.execute("SELECT * FROM movies")
     return [dict(row) for row in rows]
@@ -100,31 +100,31 @@ def get_movies_by_cinema(genre: str):
     return [dict(row) for row in rows]
 
 
-@app.get("/sessions")
+@app.get("/sessions", summary="Получение списка всех сеансов")
 def get_sessions():
     rows = db.movie.execute("SELECT * FROM sessions")
     return [dict(row) for row in rows]
 
 
-@app.get("/users")
+@app.get("/users", summary="Получение списка всех пользователей")
 def get_users():
     rows = db.ticket.execute("SELECT * FROM users")
     return [dict(row) for row in rows]
 
 
-@app.get("/tickets")
+@app.get("/tickets", summary="Получение списка всех билетов")
 def get_tickets():
     rows = db.ticket.execute("SELECT * FROM tickets")
     return [dict(row) for row in rows]
 
 
-@app.get("/orders")
+@app.get("/orders", summary="Получение списка всех заказов")
 def get_orders():
     rows = db.ticket.execute("SELECT * FROM orders")
     return [dict(row) for row in rows]
 
 
-@app.post("/cinemas")
+@app.post("/cinemas", summary="Добавление нового кинотеатра")
 def create_cinema(cinema: schemas.Cinema):
     print(unconvert_address(cinema.address))
     query = (
