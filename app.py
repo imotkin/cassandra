@@ -65,6 +65,13 @@ def get_cinema_by_id(cinema_id: int):
     return [dict(row) for row in rows]
 
 
+@app.get("/cinemas/{movie_id}", summary="Получение кинотеатров для фильма")
+def get_cinemas_by_movie(movie_id: int):
+    select_query = "SELECT * FROM cinemas_by_movie WHERE cinema_id = %i"
+    rows = db.movie.execute(select_query, movie_id)
+    return [dict(row) for row in rows]
+
+
 @app.get("/movies/{movie_id}", summary="Получение информации о фильме")
 def get_movie_by_id(movie_id: int):
     select_query = "SELECT * FROM movies WHERE movie_id = %i"
