@@ -58,22 +58,10 @@ def get_hosts():
     return db.hosts
 
 
-@app.get("/cinemas", summary="Получение списка всех кинотеатров")
-def get_cinemas():
-    rows = db.movie.execute("SELECT * FROM cinemas")
-    return [dict(row) for row in rows]
-
-
 @app.get("/cinemas/{cinema_id}", summary="Получение информации о кинотеатре")
 def get_cinema_by_id(cinema_id: int):
     select_query = "SELECT * FROM cinemas WHERE cinema_id = %i"
     rows = db.movie.execute(select_query, cinema_id)
-    return [dict(row) for row in rows]
-
-
-@app.get("/movies", summary="Получение списка всех фильмов")
-def get_movies():
-    rows = db.movie.execute("SELECT * FROM movies")
     return [dict(row) for row in rows]
 
 
@@ -111,12 +99,6 @@ def get_movies_by_cinema(genre: str):
     return [dict(row) for row in rows]
 
 
-@app.get("/sessions", summary="Получение списка всех сеансов")
-def get_sessions():
-    rows = db.movie.execute("SELECT * FROM sessions")
-    return [dict(row) for row in rows]
-
-
 @app.get("/sessions/{session_id}", summary="Получение информации о сеансе")
 def get_session_by_id(session_id: int):
     select_query = "SELECT * FROM sessions WHERE session_id = %i"
@@ -131,22 +113,10 @@ def get_session_by_movie(movie_id: int):
     return [dict(row) for row in rows]
 
 
-@app.get("/users", summary="Получение списка всех пользователей")
-def get_users():
-    rows = db.ticket.execute("SELECT * FROM users")
-    return [dict(row) for row in rows]
-
-
 @app.get("/users/{user_id}", summary="Получение информации о пользователе")
 def get_user_by_id(user_id: int):
     select_query = "SELECT * FROM users WHERE user_id = %i"
     rows = db.ticket.execute(select_query, user_id)
-    return [dict(row) for row in rows]
-
-
-@app.get("/tickets", summary="Получение списка всех билетов")
-def get_tickets():
-    rows = db.ticket.execute("SELECT * FROM tickets")
     return [dict(row) for row in rows]
 
 
@@ -168,12 +138,6 @@ def get_ticket_by_order(order_id: int):
 def get_ticket_by_order(user_id: int):
     select_query = "SELECT * FROM tickets_by_user WHERE user_id = %i"
     rows = db.ticket.execute(select_query, user_id)
-    return [dict(row) for row in rows]
-
-
-@app.get("/orders", summary="Получение списка всех заказов")
-def get_orders():
-    rows = db.ticket.execute("SELECT * FROM orders")
     return [dict(row) for row in rows]
 
 
