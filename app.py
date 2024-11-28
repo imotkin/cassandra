@@ -1,6 +1,7 @@
 from datetime import datetime
 from fastapi import FastAPI
 from database import Database
+from typing import Union
 
 import schemas
 import uuid
@@ -106,7 +107,7 @@ def get_cinema_by_id(cinema_id: uuid.UUID):
     return [dict(row) for row in rows]
 
 
-@app.get("/cinemas/{movie_id}", summary="Получение кинотеатров для фильма", tags=["cinemas"])
+@app.get("/cinemas/movies/{movie_id}", summary="Получение кинотеатров для фильма", tags=["cinemas"])
 def get_cinemas_by_movie(movie_id: uuid.UUID):
     select_query = "SELECT * FROM cinemas_by_movie WHERE cinema_id = %s"
     rows = db.movie.execute(select_query, [movie_id])
@@ -121,7 +122,7 @@ def get_movie_by_id(movie_id: uuid.UUID):
 
 
 @app.get(
-    "/movies/{cinema_id}/",
+    "/movies/cinemas/{cinema_id}/",
     summary="Получение списка фильмов для определенного кинотеатра",
     tags=["movies"]
 )
@@ -131,14 +132,14 @@ def get_movies_by_cinema(cinema_id: uuid.UUID):
     return [dict(row) for row in rows]
 
 
-@app.get("/movies/{date}/", summary="Получение списка фильмов для определенной даты", tags=["movies"])
+@app.get("/movies/dates/{date}/", summary="Получение списка фильмов для определенной даты", tags=["movies"])
 def get_movies_by_date(date: datetime):
     select_query = "SELECT * FROM movies_by_date WHERE date = %s"
     rows = db.movie.execute(select_query, [date])
     return [dict(row) for row in rows]
 
 
-@app.get("/movies/{genre}/", summary="Получение списка фильмов для определенного жанра", tags=["movies"])
+@app.get("/movies/genres/{genre}/", summary="Получение списка фильмов для определенного жанра", tags=["movies"])
 def get_movies_by_genre(genre: str):
     select_query = "SELECT * FROM movies_by_genre WHERE genre = %s"
     rows = db.movie.execute(select_query, [genre])
@@ -152,7 +153,7 @@ def get_session_by_id(session_id: uuid.UUID):
     return [dict(row) for row in rows]
 
 
-@app.get("/sessions/{movie_id}", summary="Получение сеансов по фильму", tags=["sessions"])
+@app.get("/sessions/movies/{movie_id}", summary="Получение сеансов по фильму", tags=["sessions"])
 def get_session_by_movie(movie_id: uuid.UUID):
     select_query = "SELECT * FROM sessions_by_movie WHERE movie_id = %s"
     rows = db.movie.execute(select_query, [movie_id])
@@ -173,15 +174,15 @@ def get_ticket_by_id(ticket_id: uuid.UUID):
     return [dict(row) for row in rows]
 
 
-@app.get("/tickets/{order_id}", summary="Получение билетов для определенного заказа", tags=["tickets"])
+@app.get("/tickets/orders/{order_id}", summary="Получение билетов для определенного заказа", tags=["tickets"])
 def get_ticket_by_order(order_id: uuid.UUID):
-    select_query = "SELECT * FROM tickets_by_order WHERE order_id = %s"
+    select_query = "SELECT * FROM tickets_by_order WHERE order_id = %s;"
     rows = db.ticket.execute(select_query, [order_id])
     return [dict(row) for row in rows]
 
 
 @app.get(
-    "/tickets/{user_id}", summary="Получение билетов для определенного пользователя",
+    "/tickets/users/{user_id}", summary="Получение билетов для определенного пользователя",
     tags=["tickets"]
 )
 def get_ticket_by_user(user_id: uuid.UUID):
@@ -292,3 +293,49 @@ def create_ticket(ticket: schemas.Ticket, order_id: uuid.UUID, user_id: uuid.UUI
     db.ticket.execute(tickets_user_query, [user_id, ticket.date, ticket_id, ticket.price, ticket.hall, ticket.seat])
     
     return ticket.toJSON({"id": ticket_id})
+
+
+@app.delete("/tickets/{ticket_id}", summary="Удаление записи о билете", tags=["tickets"])
+def delete_ticket(ticket_id: uuid.UUID, order_id: uuid.UUID, user_id: uuid.UUID, ticket_date: datetime):
+    tickets_query = ("DELETE FROM tickets WHERE ticket_id = %s")
+    tickets_order_query= ("DELETE FROM tickets_by_order WHERE ticket_id = %s AND order_id = %s AND date = %s")
+    tickets_user_query = ("DELETE FROM tickets_by_user WHERE ticket_id = %s AND user_id = %s AND date = %s")
+
+    db.ticket.execute(tickets_query, [ticket_id])
+    db.ticket.execute(tickets_order_query, [ticket_id, order_id, ticket_date])
+    db.ticket.execute(tickets_user_query, [ticket_id, user_id, ticket_date])
+
+    return {"status": "success"}
+
+
+@app.put("/movies/{movie_id}")
+def update_movie(movie_id: uuid.UUID, movie: schemas.MovieUpdate):
+    movies_query = ()
+    movies_by_date_query = ()
+    movies_by_genre_query = ()
+    movies_by_cinema_query = ()
+    
+    print(movie)
+
+
+@app.put("/cinema/{cinema_id}")
+def update_cinema(cinema_id: uuid.UUID, update: schemas.CinemaUpdate):
+    query = "UPDATE cinema SET "
+    params = []
+    args = []
+
+    if update.name:
+        params.append("name = %s")
+        args.append(update.name)
+    if update.address:
+        params.append(f"address = {unconvert_address(update.address)}")
+        # args.append(update.address)
+
+    args.append(cinema_id)
+
+    for table in ["cinemas", "cinemas_by_movie"]:
+        query = f'UPDATE {table} SET {", ".join(params)} WHERE cinema_id = %s'
+        print(query, args)
+        db.movie.execute(query, args)
+
+    return
