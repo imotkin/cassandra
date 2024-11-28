@@ -1,8 +1,8 @@
-INSERT: 
-    movies -> movies_by_genre (Михаил)
-    orders -> orders_by_session (Михаил)
-    tickets -> tickets_by_order, ticket_by_user (Илья)
-    sessions (Илья)
+~~INSERT:~~
+    ~~movies -> movies_by_genre (Михаил)~~
+    ~~orders -> orders_by_session (Михаил)~~
+    ~~tickets -> tickets_by_order, ticket_by_user (Илья)~~
+    ~~sessions (Илья)~~
 UPDATE:
     movies (title, duration, genre) -> movies_by_date, ..._by_genre, ..._by_cinema  (Михаил)
     movies (release_score, score) -> только в movies (Илья)
