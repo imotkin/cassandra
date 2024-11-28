@@ -1,6 +1,8 @@
 import uuid
 from datetime import datetime, date
 from pydantic import BaseModel
+from typing import Optional, Union
+from fastapi import Body
 
 
 class Model(BaseModel):
@@ -66,3 +68,16 @@ class Order(Model):
     # date: datetime
     status: str
     price: float
+    
+    
+class MovieUpdate(Model):
+    title: Union[str, None] = Body(default=None)
+    duration: Union[str, None] = Body(default=None)
+    release_date: Union[date, None] = Body(default=None)
+    genre: Union[str, None] = Body(default=None)
+    score: Union[float, None] = Body(default=None)
+
+
+class CinemaUpdate(Model):
+    name: Optional[str]
+    address: Optional[Address] = Body(default=None)

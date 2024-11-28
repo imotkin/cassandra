@@ -1,6 +1,7 @@
 from datetime import datetime
 from fastapi import FastAPI
 from database import Database
+from typing import Union
 
 import schemas
 import uuid
@@ -305,3 +306,36 @@ def delete_ticket(ticket_id: uuid.UUID, order_id: uuid.UUID, user_id: uuid.UUID,
     db.ticket.execute(tickets_user_query, [ticket_id, user_id, ticket_date])
 
     return {"status": "success"}
+
+
+@app.put("/movies/{movie_id}")
+def update_movie(movie_id: uuid.UUID, movie: schemas.MovieUpdate):
+    movies_query = ()
+    movies_by_date_query = ()
+    movies_by_genre_query = ()
+    movies_by_cinema_query = ()
+    
+    print(movie)
+
+
+@app.put("/cinema/{cinema_id}")
+def update_cinema(cinema_id: uuid.UUID, update: schemas.CinemaUpdate):
+    query = "UPDATE cinema SET "
+    params = []
+    args = []
+
+    if update.name:
+        params.append("name = %s")
+        args.append(update.name)
+    if update.address:
+        params.append(f"address = {unconvert_address(update.address)}")
+        # args.append(update.address)
+
+    args.append(cinema_id)
+
+    for table in ["cinemas", "cinemas_by_movie"]:
+        query = f'UPDATE {table} SET {", ".join(params)} WHERE cinema_id = %s'
+        print(query, args)
+        db.movie.execute(query, args)
+
+    return

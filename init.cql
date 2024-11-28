@@ -13,30 +13,30 @@ CREATE TABLE IF NOT EXISTS movies (
 
 CREATE TABLE IF NOT EXISTS movies_by_cinema (
     cinema_id UUID,
+    movie_id  UUID,
     title     TEXT,
     date      DATE,
-    movie_id  UUID,
     genre     TEXT,
     duration  DURATION,
-    PRIMARY KEY (cinema_id, title, date)
-) WITH CLUSTERING ORDER BY (title ASC, date DESC);
+    PRIMARY KEY (cinema_id, movie_id)
+) WITH CLUSTERING ORDER BY (movie_id);
 
 CREATE TABLE IF NOT EXISTS movies_by_date (
     date     DATE,
-    title    TEXT,
     movie_id UUID,
+    title    TEXT,
     genre    TEXT,
     duration DURATION,
-    PRIMARY KEY (date, title)
-) WITH CLUSTERING ORDER BY (title ASC);
+    PRIMARY KEY (date, movie_id)
+) WITH CLUSTERING ORDER BY (movie_id);
 
 CREATE TABLE IF NOT EXISTS movies_by_genre (
     genre    TEXT,
-    title    TEXT,
     movie_id UUID,
+    title    TEXT,
     duration DURATION,
-    PRIMARY KEY (genre, title)
-) WITH CLUSTERING ORDER BY (title ASC);
+    PRIMARY KEY (genre, movie_id)
+) WITH CLUSTERING ORDER BY (movie_id);
 
 CREATE TYPE IF NOT EXISTS address (
     city        TEXT,
@@ -48,11 +48,11 @@ CREATE TYPE IF NOT EXISTS address (
 
 CREATE TABLE IF NOT EXISTS cinemas_by_movie (
     movie_id  UUID,
-    name      TEXT,
     cinema_id UUID,
+    name      TEXT,
     address   ADDRESS,
-    PRIMARY KEY (movie_id, name)
-) WITH CLUSTERING ORDER BY (name ASC);
+    PRIMARY KEY (movie_id, cinema_id)
+) WITH CLUSTERING ORDER BY (cinema_id);
 
 CREATE TABLE IF NOT EXISTS cinemas (
     cinema_id UUID PRIMARY KEY,
@@ -63,12 +63,12 @@ CREATE TABLE IF NOT EXISTS cinemas (
 
 CREATE TABLE IF NOT EXISTS sessions_by_movie (
     movie_id   UUID,
-    time       TIME,
     session_id UUID,
+    time       TIME,
     hall       SMALLINT,
     price      FLOAT,
-    PRIMARY KEY (movie_id, time)
-) WITH CLUSTERING ORDER BY (time ASC);
+    PRIMARY KEY (movie_id, session_id)
+) WITH CLUSTERING ORDER BY (session_id);
 
 CREATE TABLE IF NOT EXISTS sessions (
     session_id      UUID PRIMARY KEY,
