@@ -114,3 +114,5 @@ CREATE TABLE ticket.users (
     AND speculative_retry = '99p';
 INSERT INTO "ticket"."orders" ("order_id", "cinema_id", "date", "price", "status", "user_id") VALUES (76b9a1f3-b44e-4ee0-8bba-bc0bb807f663, 221402f3-0f08-4b91-b36d-7d4cf99e70e3, 1732830544992, 12345.0, 'READY', ebf08275-68b4-4572-9239-d662eba9c645);
 INSERT INTO "ticket"."users" ("user_id", "email", "name", "password", "phone") VALUES (ebf08275-68b4-4572-9239-d662eba9c645, 'johndoe@mail.com', 'John Doe', 'secret', '+123456789');
+INSERT INTO tickets_by_user (user_id, ticket_id, date, hall, price, seat) VALUES (ebf08275-68b4-4572-9239-d662eba9c645, c4ad1b51-78e9-4c4d-ac7d-6007fcc6294e, '2024-12-03T19:31:21.685Z', 15, 1250, 13);
+INSERT INTO tickets_by_order (order_id, ticket_id, date, hall, price, seat) VALUES (76b9a1f3-b44e-4ee0-8bba-bc0bb807f663, c4ad1b51-78e9-4c4d-ac7d-6007fcc6294e, '2024-12-03T19:31:21.685Z', 15, 1250, 13);

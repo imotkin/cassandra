@@ -1,7 +1,6 @@
 from datetime import datetime
 from fastapi import FastAPI
 from database import Database
-from typing import Union
 
 import schemas
 import uuid
@@ -61,7 +60,7 @@ UUIDs:
     movies: 75e1da89-a6ab-488a-b8a0-8f5be093be2f, ca15c3ec-a7ec-421a-9f36-ddde25de358b
     orders: 76b9a1f3-b44e-4ee0-8bba-bc0bb807f663
     sessions: f44a57ee-f30c-4cc2-a808-5bbd4fdffb86, b3687303-1a9a-4acd-8c6e-573340b28354
-    tickets: 78fc34ac-2cc1-4428-ac56-cfa096f8bfab
+    tickets: c4ad1b51-78e9-4c4d-ac7d-6007fcc6294e, cfcd0aeb-69c4-48e3-82e9-91a822a6cb3c
 
 TEST:
     http://127.0.0.1:8000/orders?session_id=b3687303-1a9a-4acd-8c6e-573340b28354&user_id=ebf08275-68b4-4572-9239-d662eba9c645&cinema_id=221402f3-0f08-4b91-b36d-7d4cf99e70e3
@@ -109,7 +108,7 @@ def get_cinema_by_id(cinema_id: uuid.UUID):
 
 @app.get("/cinemas/movies/{movie_id}", summary="Получение кинотеатров для фильма", tags=["cinemas"])
 def get_cinemas_by_movie(movie_id: uuid.UUID):
-    select_query = "SELECT * FROM cinemas_by_movie WHERE cinema_id = %s"
+    select_query = "SELECT * FROM cinemas_by_movie WHERE movie_id = %s"
     rows = db.movie.execute(select_query, [movie_id])
     return [dict(row) for row in rows]
 
@@ -133,7 +132,7 @@ def get_movies_by_cinema(cinema_id: uuid.UUID):
 
 
 @app.get("/movies/dates/{date}/", summary="Получение списка фильмов для определенной даты", tags=["movies"])
-def get_movies_by_date(date: datetime):
+def get_movies_by_date(date: str):
     select_query = "SELECT * FROM movies_by_date WHERE date = %s"
     rows = db.movie.execute(select_query, [date])
     return [dict(row) for row in rows]
@@ -308,19 +307,89 @@ def delete_ticket(ticket_id: uuid.UUID, order_id: uuid.UUID, user_id: uuid.UUID,
     return {"status": "success"}
 
 
-@app.put("/movies/{movie_id}")
+@app.put("/movies/{movie_id}", summary="Обновление информации о фильме", tags=["movies"])
 def update_movie(movie_id: uuid.UUID, movie: schemas.MovieUpdate):
-    movies_query = ()
-    movies_by_date_query = ()
-    movies_by_genre_query = ()
-    movies_by_cinema_query = ()
+
+    def get_params(param_list: list, movie, old_row=None):
+        params = []
+        args = []
+        movie_dict = movie.toJSON()
+
+        for param in param_list:
+            if param in movie_dict.keys() and movie_dict[param] is not None:
+                params.append(f"{param} = %s")
+                args.append(movie_dict[param])
+            elif old_row is not None:
+                params.append(f"{param} = %s")
+                args.append(old_row[param])
+
+        return params, args
+
+    params = []
+    args = []
+    movie_date = None
+    movie_genre = None
+
+    if movie.genre is not None:
+        movie_genre = True
+    if movie.release_date is not None:
+        movie_date = True
+
+    old_row = get_movie_by_id(movie_id)[0]
+
+    params, args = get_params(list(movie.toJSON().keys()), movie)
+    params = ", ".join(params)
+    print(params, "\n", args)
     
-    print(movie)
+    movies_query = f"UPDATE movies SET {params} WHERE movie_id = %s"
+    db.movie.execute(movies_query, (*args, movie_id))
+
+    cinemas = get_cinemas_by_movie(movie_id)
+    params = params.replace("release_date", "date", 1)
+    print(params)
+    movies_by_cinema_query = f"UPDATE movies_by_cinema SET {params} WHERE cinema_id = %s AND movie_id = %s"
+
+    for cinema in cinemas:
+        db.movie.execute(movies_by_cinema_query, (*args, cinema.get("cinema_id"), movie_id))
+
+    if movie_date is not None:
+        delete_query = "DELETE FROM movies_by_date WHERE date = %s AND movie_id = %s"
+        db.movie.execute(delete_query, (old_row["release_date"], movie_id))
+
+        params, args = get_params(["title", "genre", "duration"], movie, old_row)
+
+        insert_args = [movie.release_date, movie_id]
+        insert_args.extend(args)
+
+        insert_query = "INSERT INTO movies_by_date (date, movie_id, title, genre, duration) VALUES (%s, %s, %s, %s, %s)"
+        print(insert_query, insert_args)
+        db.movie.execute(insert_query, insert_args)
+        
+        # movies_by_date_query = "UPDATE movies_by_date SET = {params} WHERE date = %s AND movie_id = %s"
+
+    if movie_genre is not None:
+        # print(movie)
+        # print(old_row)
+
+        delete_query = "DELETE FROM movies_by_genre WHERE genre = %s AND movie_id = %s"
+        db.movie.execute(delete_query, (old_row["genre"], movie_id))
+
+        params, args = get_params(["title", "duration"], movie, old_row)
+
+        insert_args = [movie.genre, movie_id]
+        insert_args.extend(args)
+
+        insert_query = "INSERT INTO movies_by_genre (genre, movie_id, title, duration) VALUES (%s, %s, %s, %s)"
+        print(insert_query, insert_args)
+        db.movie.execute(insert_query, insert_args)
+
+        # movies_by_genre_query = "UPDATE movies_by_genre SET = {params} WHERE genre = %s AND movie_id = %s"
+    
+    # print(movie)
 
 
-@app.put("/cinema/{cinema_id}")
+@app.put("/cinema/{cinema_id}", summary="Обновление информации о кинотеатре", tags=["cinemas"])
 def update_cinema(cinema_id: uuid.UUID, update: schemas.CinemaUpdate):
-    query = "UPDATE cinema SET "
     params = []
     args = []
 
@@ -329,13 +398,54 @@ def update_cinema(cinema_id: uuid.UUID, update: schemas.CinemaUpdate):
         args.append(update.name)
     if update.address:
         params.append(f"address = {unconvert_address(update.address)}")
-        # args.append(update.address)
 
     args.append(cinema_id)
 
-    for table in ["cinemas", "cinemas_by_movie"]:
-        query = f'UPDATE {table} SET {", ".join(params)} WHERE cinema_id = %s'
-        print(query, args)
-        db.movie.execute(query, args)
+    params = ", ".join(params)
+
+    query = f"UPDATE cinemas SET {params} WHERE cinema_id = %s"
+    db.movie.execute(query, args)
+
+    movies = get_movies_by_cinema(cinema_id)
+    query = f"UPDATE cinemas_by_movie SET {params} WHERE cinema_id = %s AND movie_id = %s"
+
+    for movie in movies:
+        db.movie.execute(query, (*args, movie.get("movie_id")))
 
     return
+
+
+@app.put("/tickets/{ticket_id}", summary="Обновление информации о билете", tags=["tickets"])
+def update_ticket(ticket_id: uuid.UUID, order_id: uuid.UUID, user_id: uuid.UUID, update: schemas.TicketUpdate):
+    # order_id, ticket_id
+    params = []
+    args = []
+    ticket_date = None
+    
+    if update.price:
+        params.append("price = %s")
+        args.append(update.price)
+    if update.hall:
+        params.append("hall = %s")
+        args.append(update.hall)
+    if update.seat:
+        params.append("seat = %s")
+        args.append(update.seat)
+    if update.date:
+        params.append("date = %s")
+        args.append(update.date)
+        ticket_date = update.date
+    else:
+        old_row = get_ticket_by_id(ticket_id)[0]
+        ticket_date = old_row['date']
+    
+    params = ", ".join(params)
+
+    query = f'UPDATE tickets SET {params} WHERE ticket_id = %s'
+    db.ticket.execute(query, (*args, ticket_id))
+    
+    query = f"UPDATE tickets_by_order SET {params} WHERE order_id = %s AND date = %s AND ticket_id = %s"
+    db.ticket.execute(query, (*args, order_id, ticket_date, ticket_id))
+
+    query = f"UPDATE tickets_by_user SET {params} WHERE user_id = %s AND date = %s AND ticket_id = %s"
+    db.ticket.execute(query, (*args, user_id, ticket_date, ticket_id))
