@@ -9,7 +9,7 @@ class Database:
     def __init__(self, test=False):
         if test:
             return
-        self.cluster = Cluster(["127.0.0.1"])
+        self.cluster = Cluster(["127.0.0.1:9042", "127.0.0.1:9043", "127.0.0.1:9044"], port=9042)
         self.sessions = {}
 
     def session(self, keyspace: str):
