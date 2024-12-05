@@ -9,7 +9,7 @@ class Database:
     def __init__(self, test=False):
         if test:
             return
-        self.cluster = Cluster(["127.0.0.1:9042", "127.0.0.1:9043", "127.0.0.1:9044"], port=9042)
+        self.cluster = Cluster([("127.0.0.1", "9042"), ("127.0.0.1", "9043"), ("127.0.0.1", "9044")])
         self.sessions = {}
 
     def session(self, keyspace: str):
@@ -31,7 +31,7 @@ class Database:
 
     @property
     def movie(self):
-        if "movie" in self.sessions:
+        if "movie" in self.sessions:  #  and not self.sessions["movie"].is_shutdown:
             return self.sessions["movie"]
         else:
             created = self.session("movie")
