@@ -1,4 +1,4 @@
-CREATE KEYSPACE IF NOT EXISTS movie WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 1};
+CREATE KEYSPACE IF NOT EXISTS movie WITH REPLICATION = {'class': 'NetworkTopologyStrategy', 'replication_factor': 3};
 
 USE movie;
 
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS orders_by_session (
     PRIMARY KEY (session_id, order_id, date)
 ) WITH CLUSTERING ORDER BY (order_id ASC, date DESC);
 
-CREATE KEYSPACE IF NOT EXISTS ticket WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 1};
+CREATE KEYSPACE IF NOT EXISTS ticket WITH REPLICATION = {'class': 'NetworkTopologyStrategy', 'replication_factor': 3};
 
 USE ticket;
 
